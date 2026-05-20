@@ -1,0 +1,27 @@
+{
+  "AppName": "abrplayer-backend",
+  "InstNo": 1,
+  "HttpPort": 8088,
+  "Mysql": {
+    "Host": "127.0.0.1",
+    "BackupHost": "127.0.0.1",
+    "Port": 3306,
+    "User": "root",
+    "Password": "CHANGE_ME",
+    "DbName": "abrplayer"
+  },
+  "LarkApi": {
+    "LarkWebhook": "",
+    "LarkSecret": ""
+  },
+  "ApiSecret": "",
+  "StreamingPlayDomain": "https://play.example.com",
+  "tencent": {
+    "txKeyMain": "REPLACE_WITH_TENCENT_PUSH_KEY_MAIN",
+    "txKeyBack": "REPLACE_WITH_TENCENT_PUSH_KEY_BACKUP"
+  },
+  "admin": {
+    "username": "admin",
+    "password": "CHANGE_ME_ADMIN_PASSWORD"
+  }
+}

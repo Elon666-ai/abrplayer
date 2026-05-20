@@ -1,0 +1,11 @@
+/tmp
+/binaries
+/coverage*.txt
+/apidocs/*.html
+*.mp4
+refer/
+*.pem
+*.log
+logs/
+*.exe
+

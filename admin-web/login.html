@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AbrPlayer Admin - Login</title>
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    .login-shell {
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      padding: 24px;
+      background: var(--bg);
+    }
+    .login-card {
+      width: 100%;
+      max-width: 360px;
+      padding: 28px 26px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+    .login-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .login-brand .brand-mark {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 700;
+    }
+    .login-brand-title { font-size: 18px; font-weight: 700; }
+    .login-brand-sub { margin-top: 2px; color: var(--muted); font-size: 13px; }
+    .login-form { display: grid; gap: 14px; }
+    .login-form label { display: grid; gap: 6px; color: var(--muted); font-size: 13px; }
+    .login-actions { display: grid; gap: 10px; margin-top: 4px; }
+    .login-error {
+      display: none;
+      padding: 9px 12px;
+      border-radius: 6px;
+      background: #fee4e2;
+      color: #b42318;
+      font-size: 13px;
+    }
+    .login-error.visible { display: block; }
+  </style>
+</head>
+<body>
+  <div class="login-shell">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="brand-mark">AP</div>
+        <div>
+          <div class="login-brand-title">AbrPlayer</div>
+          <div class="login-brand-sub">admin-web 登录</div>
+        </div>
+      </div>
+      <form id="loginForm" class="login-form" autocomplete="on">
+        <label>用户名
+          <input id="loginUsername" name="username" type="text" autocomplete="username" required autofocus>
+        </label>
+        <label>密码
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+        </label>
+        <div id="loginError" class="login-error"></div>
+        <div class="login-actions">
+          <button id="loginSubmit" type="submit" class="primary">登录</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var form = document.getElementById("loginForm");
+      var usernameInput = document.getElementById("loginUsername");
+      var passwordInput = document.getElementById("loginPassword");
+      var submitBtn = document.getElementById("loginSubmit");
+      var errorBox = document.getElementById("loginError");
+
+      function showError(message) {
+        errorBox.textContent = message;
+        errorBox.classList.add("visible");
+      }
+
+      function clearError() {
+        errorBox.textContent = "";
+        errorBox.classList.remove("visible");
+      }
+
+      function mapErrorMessage(code, httpStatus) {
+        if (code === 401 || httpStatus === 401) return "用户名或密码错误";
+        if (httpStatus >= 400 && httpStatus < 500) return "请求参数错误";
+        if (httpStatus >= 500) return "服务暂时不可用";
+        return "登录失败，请稍后重试";
+      }
+
+      form.addEventListener("submit", async function (event) {
+        event.preventDefault();
+        clearError();
+        var username = usernameInput.value.trim();
+        var password = passwordInput.value;
+        if (!username || !password) {
+          showError("请输入用户名和密码");
+          return;
+        }
+        submitBtn.disabled = true;
+        submitBtn.textContent = "登录中...";
+        try {
+          var resp = await fetch("/api/auth/login", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: username, password: password }),
+          });
+          var payload = null;
+          try { payload = await resp.json(); } catch (_) { payload = null; }
+          var code = payload && typeof payload.code === "number" ? payload.code : null;
+          if (resp.ok && code === 0) {
+            window.location.href = "./index.html";
+            return;
+          }
+          showError(mapErrorMessage(code, resp.status));
+          if (payload && payload.msg) console.error("[login]", payload.msg);
+        } catch (err) {
+          console.error("[login] network", err);
+          showError("网络异常，请稍后重试");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "登录";
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

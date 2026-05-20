@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AbrPlayer Admin</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">AP</div>
+      <div>
+        <div class="brand-name">AbrPlayer</div>
+        <div class="brand-subtitle">admin-web</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="stat">StatAPI</button>
+      <button class="nav-item" data-view="player">AbrPlayer</button>
+      <button class="nav-item" data-view="pusher">Multipusher</button>
+      <button class="nav-item" data-view="health">Health</button>
+    </nav>
+  </aside>
+
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <h1 id="pageTitle">StatAPI</h1>
+        <p id="pageSubtitle">播放埋点、趋势和播放域名配置。</p>
+      </div>
+      <div class="user-box">
+        <span id="currentUser" class="current-user"></span>
+        <button id="logoutBtn">退出</button>
+      </div>
+    </header>
+
+    <section id="view-stat" class="view active">
+      <section class="panel settings-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Play domain</h2>
+            <span id="playDomainStatus">未加载</span>
+          </div>
+        </div>
+        <div class="settings-form">
+          <label>WebRTC play domain
+            <input id="playDomain" type="text" placeholder="play.example.com">
+          </label>
+          <button id="savePlayDomain" class="primary">Save domain</button>
+        </div>
+      </section>
+
+      <section class="filters">
+        <label>Start time <input id="startTime" type="datetime-local"></label>
+        <label>End time <input id="endTime" type="datetime-local"></label>
+        <label>Stream <select id="streamName"></select></label>
+        <label>Status
+          <select id="isSucceed">
+            <option value="">全部</option>
+            <option value="true">成功</option>
+            <option value="false">失败</option>
+          </select>
+        </label>
+        <label>CDN <input id="cdnName" type="text" placeholder="Tencent"></label>
+        <label>Agent type <input id="agentType" type="text" placeholder="Chrome / Mobile"></label>
+        <label>Min load ms <input id="minLoadTime" type="number" min="0"></label>
+        <label>Max load ms <input id="maxLoadTime" type="number" min="0"></label>
+        <div class="filter-actions">
+          <button id="refresh" class="primary">Refresh</button>
+          <button id="reset">Reset</button>
+        </div>
+      </section>
+
+      <section class="metrics">
+        <div class="metric"><span>Total</span><strong id="metricTotal">--</strong></div>
+        <div class="metric"><span>Success rate (本页)</span><strong id="metricSuccessRate">--</strong></div>
+        <div class="metric"><span>Avg load</span><strong id="metricAvgLoad">--</strong></div>
+        <div class="metric"><span>Lag rate</span><strong id="metricLagRate">--</strong></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Trend</h2>
+          <span id="trendStatus">未加载</span>
+        </div>
+        <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+        <div class="legend">
+          <span><i class="line-blue"></i>request total</span>
+          <span><i class="line-green"></i>success rate</span>
+          <span><i class="line-amber"></i>avg load</span>
+          <span><i class="line-red"></i>lag rate</span>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Play records</h2>
+          <div class="pager">
+            <button id="prevPage">Prev</button>
+            <span id="pageInfo">--</span>
+            <button id="nextPage">Next</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Stream</th>
+                <th>CDN</th>
+                <th>User</th>
+                <th>Status</th>
+                <th>Load ms</th>
+                <th>Retry</th>
+                <th>Reason</th>
+                <th>User agent</th>
+              </tr>
+            </thead>
+            <tbody id="resultRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <section id="view-player" class="view">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>AbrPlayer launch</h2>
+            <span>生成播放器访问链接，不自动播放。</span>
+          </div>
+        </div>
+        <div class="control-grid">
+          <label>APP_ENV
+            <select id="playerEnv"></select>
+          </label>
+          <label>Site name <select id="playerSite"></select></label>
+          <label>View name <select id="playerView"></select></label>
+          <label>Quality select
+            <select id="playerQuality">
+              <option value="auto">auto</option>
+              <option value="1080P">1080P</option>
+              <option value="720P">720P</option>
+              <option value="360P">360P</option>
+              <option value="audio">audio</option>
+            </select>
+          </label>
+          <label>AbrPlayer base URL <input id="playerBaseUrl" type="text"></label>
+        </div>
+        <div class="copy-row">
+          <input id="playerUrl" type="text" readonly>
+          <button id="copyPlayerUrl">Copy</button>
+          <button id="openPlayerUrl" class="primary">Open</button>
+        </div>
+      </section>
+
+      <section class="panel settings-panel">
+        <div class="panel-head">
+          <div>
+            <h2>Environment domains</h2>
+            <span id="envDomainStatus">not loaded</span>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="compact-table">
+            <thead>
+              <tr>
+                <th>APP_ENV</th>
+                <th>Label</th>
+                <th>Public base URL</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="envDomainRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Stream ladder</h2>
+          <span>standard 同质量等级优先 HEVC，失败回退 H.264。</span>
+        </div>
+        <div class="table-wrap">
+          <table class="ladder-table">
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th>Stream name</th>
+                <th>Codec</th>
+                <th>Bitrate</th>
+                <th>Resolution</th>
+                <th>Rule</th>
+              </tr>
+            </thead>
+            <tbody id="playerLadderRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>ABR thresholds</h2><span>standard 与 standard_hevc 共用门槛。</span></div>
+        <div class="info-grid">
+          <div class="info-card"><span>Upgrade</span><strong>bottom 300 / economic 500 / standard 1200 kbps</strong></div>
+          <div class="info-card"><span>Downgrade</span><strong>bottom 200 / economic 400 / standard 800 / high 1500 kbps</strong></div>
+          <div class="info-card"><span>Zero bandwidth</span><strong>维持或切换到 audio only，降低测速频率。</strong></div>
+        </div>
+      </section>
+    </section>
+
+    <section id="view-pusher" class="view">
+      <section class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Multipusher operations</h2>
+            <span>Web 后台不远程控制 Multipusher；启动、停止仍在本机 Fyne UI 中执行。</span>
+          </div>
+        </div>
+        <div class="note">
+          本页只展示流命名、编码参数和排障约定，避免 Web 后台跨机器远程控制本地采集设备。
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Site / stream mapping</h2><span>与 Fyne UI 联动规则一致。</span></div>
+        <div class="table-wrap">
+          <table class="compact-table">
+            <thead><tr><th>Site name</th><th>Stream name options</th><th>Default</th></tr></thead>
+            <tbody>
+              <tr><td>studio_3drush</td><td>3drush-fwh, 3drush-fwv</td><td>3drush-fwh</td></tr>
+              <tr><td>studio_gsp2w</td><td>gsp2w-fwv, gsp2w-fwh</td><td>gsp2w-fwv</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><h2>Output profiles</h2><span>编码参数来自 multipusher YAML 默认配置。</span></div>
+        <div class="table-wrap">
+          <table class="ladder-table">
+            <thead>
+              <tr>
+                <th>Level</th>
+                <th>Stream template</th>
+                <th>Encoding parameter</th>
+                <th>Status meaning</th>
+              </tr>
+            </thead>
+            <tbody id="pusherProfileRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <section id="view-health" class="view">
+      <section class="panel">
+        <div class="panel-head"><h2>Health checks</h2><span>同源接口可直接检测；外部播放器地址可能受 CORS 限制。</span></div>
+        <div class="health-grid" id="healthCards"></div>
+      </section>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" hidden></div>
+  <script src="./app.js"></script>
+</body>
+</html>

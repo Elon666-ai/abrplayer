@@ -1,0 +1,83 @@
+siteName: example_site
+
+tencentSrt:
+  host: publish.xxxx.net
+  port: 9000
+  app: live
+  tokenDays: 30
+
+input:
+  mode: device          # device | file
+  videoDevice: "Logitech HD Pro Webcam C920"
+  audioDevice: "Microphone (HD Pro Webcam C920)"
+  videoFile: ""         # only used when mode=file (.mp4)
+  videoLayout: portrait # portrait | landscape
+
+publish:
+  onReady: false
+  reconnectMinSeconds: 3
+  reconnectMaxSeconds: 60
+
+# === SECRETS ===
+# These four fields MUST be set (validated at startup).
+# Prefer environment variables in production:
+#   VPUBLISHER_APP_ID
+#   VPUBLISHER_APP_SECRET
+#   VPUBLISHER_TX_KEY_MAIN
+#   VPUBLISHER_TX_KEY_BACK
+secrets:
+  appId: "REPLACE_WITH_APP_ID"
+  appSecret: "REPLACE_WITH_APP_SECRET"
+  txKeyMain: "REPLACE_WITH_TENCENT_PUSH_KEY_MAIN"
+  txKeyBack: "REPLACE_WITH_TENCENT_PUSH_KEY_BACKUP"
+
+streams:
+  - level: bottom
+    streamName: "{siteName}_audio"
+    audioOnly: true
+    audioCodec: aac
+    audioBitrate: 128k
+  - level: economic
+    streamName: "{siteName}_economic"
+    videoCodec: h264
+    videoBitrate: 400k
+    videoMaxrate: 600k
+    portraitWidth: 360
+    portraitHeight: 640
+    landscapeWidth: 640
+    landscapeHeight: 360
+    audioCodec: aac
+    audioBitrate: 128k
+  - level: standard_hevc
+    streamName: "{siteName}_standard_hevc"
+    videoCodec: hevc
+    videoBitrate: 600k
+    videoMaxrate: 1000k
+    portraitWidth: 720
+    portraitHeight: 1280
+    landscapeWidth: 1280
+    landscapeHeight: 720
+    audioCodec: aac
+    audioBitrate: 128k
+  - level: standard
+    streamName: "{siteName}_standard"
+    videoCodec: h264
+    videoBitrate: 1000k
+    videoMaxrate: 1500k
+    portraitWidth: 720
+    portraitHeight: 1280
+    landscapeWidth: 1280
+    landscapeHeight: 720
+    audioCodec: aac
+    audioBitrate: 128k
+  - level: high
+    streamName: "{siteName}"
+    videoCodec: h264
+    videoBitrate: 2000k
+    videoMaxrate: 3000k
+    portraitWidth: 1080
+    portraitHeight: 1920
+    landscapeWidth: 1920
+    landscapeHeight: 1080
+    audioCodec: aac
+    audioBitrate: 128k
